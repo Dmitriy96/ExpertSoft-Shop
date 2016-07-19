@@ -1,160 +1,113 @@
 package by.expertsoft.phone_shop.controller;
 
 
+import by.expertsoft.phone_shop.entity.Order;
 import by.expertsoft.phone_shop.entity.OrderItem;
-import by.expertsoft.phone_shop.entity.Phone;
-import by.expertsoft.phone_shop.service.OrderService;
 import by.expertsoft.phone_shop.service.PhoneService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CartController extends ParameterizableViewController {
 
     private Logger logger = LogManager.getLogger(CartController.class.getName());
     private PhoneService phoneService;
-    private Map<String, String> urlRegexToGetMethodNameMap = new HashMap<>();
-    private Map<String, String> urlRegexToPostMethodNameMap = new HashMap<>();
-    private Map<String, String> urlRegexToPutMethodNameMap = new HashMap<>();
 
-    private ModelAndView getCartPage(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-        Map<Long, Integer> phonesIdToQuantityMap = (Map<Long, Integer>) session.getAttribute("phonesInCart");
-        List<OrderItem> orderItems = new ArrayList<>();
-        Double subtotal = 0.0;
-        if (phonesIdToQuantityMap != null) {
-            for (Long phoneId : phonesIdToQuantityMap.keySet()) {
-                Phone phone = phoneService.get(phoneId);
-                OrderItem orderItem = new OrderItem();
-                orderItem.setPhone(phone);
-                orderItem.setQuantity(phonesIdToQuantityMap.get(phoneId));
-                orderItems.add(orderItem);
-                subtotal += phone.getPrice() * phonesIdToQuantityMap.get(phoneId);
-            }
+    public String getCartPage(Model model, HttpSession session) {
+        logger.debug("getCartPage");
+        Order order = (Order) session.getAttribute("order");
+        model.addAttribute("order", order);
+        return "cart";
+    }
+
+    public String submitCart(HttpSession session) {
+        logger.debug("submitCart");
+        Order order = (Order) session.getAttribute("order");
+        if (order == null || order.getOrderItems() == null || order.getOrderItems().size() == 0) {
+            return "redirect:/cart";
         }
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("cart");
-        modelAndView.addObject("orderItems", orderItems);
-        modelAndView.addObject("subtotal", subtotal);
-        return modelAndView;
+        return "redirect:/personal_data";
     }
 
-    private ModelAndView submitCart(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-        Map<Long, Integer> phonesIdToQuantityMap = (Map<Long, Integer>) session.getAttribute("phonesInCart");
-        ModelAndView modelAndView = new ModelAndView();
-        if (phonesIdToQuantityMap == null || phonesIdToQuantityMap.keySet().size() == 0) {
-            modelAndView.setViewName("redirect:/cart");
-        } else
-            modelAndView.setViewName("redirect:/order");
-        return modelAndView;
-    }
-
-    private void addPhoneToCart(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> addPhoneToCart(HttpServletRequest request, HttpSession session) {
         String urlServletPath = request.getServletPath();
+        String countParameter = request.getParameter("count");
+        logger.debug("addPhoneToCart: urlServletPath - {}, count - {}", urlServletPath, countParameter);
         Long phoneId = Long.parseLong(urlServletPath.substring(urlServletPath.lastIndexOf('/') + 1));
-        String count = request.getParameter("count");
-        if (count == null)
-            throw new IllegalStateException("`Count` parameter is absent.");
-        HttpSession session = request.getSession();
-        Map<Long, Integer> phonesIdToQuantityMap = (Map<Long, Integer>) session.getAttribute("phonesInCart");
-        if (phonesIdToQuantityMap != null) {
-            Integer totalCount = phonesIdToQuantityMap.get(phoneId);
-            if (totalCount != null) {
-                totalCount += Integer.parseInt(count);
-            } else {
-                totalCount = Integer.parseInt(count);
-            }
-            phonesIdToQuantityMap.put(phoneId, totalCount);
-            session.setAttribute("phonesInCart", phonesIdToQuantityMap);
-        } else {
-            phonesIdToQuantityMap = new HashMap<>();
-            phonesIdToQuantityMap.put(phoneId, Integer.parseInt(count));
-            session.setAttribute("phonesInCart", phonesIdToQuantityMap);
-        }
-    }
-
-    private void removePhoneFromCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String urlServletPath = request.getServletPath();
-        Long phoneId = Long.parseLong(urlServletPath.substring(urlServletPath.lastIndexOf('/') + 1));
-        HttpSession session = request.getSession();
-        Map<Long, Integer> phonesIdToQuantityMap = (Map<Long, Integer>) session.getAttribute("phonesInCart");
-        if (phonesIdToQuantityMap != null) {
-            phonesIdToQuantityMap.remove(phoneId);
-            Double subtotal = 0.0;
-            for (Long id : phonesIdToQuantityMap.keySet()) {
-                Phone phone = phoneService.get(id);
-                subtotal += phone.getPrice() * phonesIdToQuantityMap.get(id);
-            }
-            response.getWriter().write(subtotal.toString());
-        }
-    }
-
-    private ModelAndView processRequest(HttpServletRequest request, HttpServletResponse response, Map<String, String> urlRegexToMethodNameMap) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String urlServletPath = request.getServletPath();
-        for (String urlRegex : urlRegexToMethodNameMap.keySet()) {
-            Pattern pattern = Pattern.compile(urlRegex);
-            Matcher matcher = pattern.matcher(urlServletPath);
-            if (matcher.matches()) {
-                Method method = this.getClass().getDeclaredMethod(urlRegexToMethodNameMap.get(urlRegex),
-                        HttpServletRequest.class, HttpServletResponse.class);
-                if (method.getReturnType().equals(ModelAndView.class))
-                    return (ModelAndView) method.invoke(this, request, response);
-                else {
-                    method.invoke(this, request, response);
-                    return null;
+        if (countParameter == null)
+            throw new IllegalArgumentException("`Count` parameter is absent.");
+        Integer count = Integer.parseInt(countParameter);                               // TODO parse in try catch
+        Order order = (Order) session.getAttribute("order");
+        if (order != null) {
+            OrderItem orderItem = null;
+            for (OrderItem existingOrderItem : order.getOrderItems()) {
+                if (existingOrderItem.getPhone().getId().equals(phoneId)) {
+                    orderItem = existingOrderItem;
                 }
             }
+            if (orderItem != null) {
+                BigDecimal addingPhonesPrice = new BigDecimal(orderItem.getPhone().getPrice() * count);
+                BigDecimal totalPrice = order.getTotalPrice().add(addingPhonesPrice);
+                order.setTotalPrice(totalPrice);
+                Integer quantity = orderItem.getQuantity();
+                quantity += count;
+                orderItem.setQuantity(quantity);
+            } else {
+                OrderItem newOrderItem = new OrderItem();
+                newOrderItem.setQuantity(count);
+                newOrderItem.setPhone(phoneService.get(phoneId));
+                order.getOrderItems().add(newOrderItem);
+                BigDecimal addingPhonesPrice = new BigDecimal(newOrderItem.getPhone().getPrice() * count);
+                BigDecimal totalPrice = order.getTotalPrice().add(addingPhonesPrice);
+                order.setTotalPrice(totalPrice);
+            }
+        } else {
+            order = new Order();
+            List<OrderItem> orderItems = new ArrayList<>();
+            OrderItem orderItem = new OrderItem();
+            orderItem.setQuantity(count);
+            orderItem.setPhone(phoneService.get(phoneId));
+            orderItems.add(orderItem);
+            order.setOrderItems(orderItems);
+            BigDecimal addingPhonesPrice = new BigDecimal(orderItem.getPhone().getPrice() * count);
+            order.setTotalPrice(addingPhonesPrice);
         }
-        throw new NoSuchMethodException("Method not found.");
+        session.setAttribute("order", order);
+        return new ResponseEntity<String>(HttpStatus.OK);
     }
 
-    @Override
-    protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String requestMethod = request.getMethod();
-        if (HttpMethod.GET.name().equals(requestMethod)) {
-            return processRequest(request, response, urlRegexToGetMethodNameMap);
+    public ResponseEntity<String> removePhoneFromCart(HttpServletRequest request, HttpSession session) throws IOException {
+        logger.debug("removePhoneFromCart");
+        String urlServletPath = request.getServletPath();
+        Long phoneId = Long.parseLong(urlServletPath.substring(urlServletPath.lastIndexOf('/') + 1));
+        Order order = (Order) session.getAttribute("order");
+        Iterator<OrderItem> iterator = order.getOrderItems().iterator();
+        while (iterator.hasNext()) {
+            OrderItem orderItem = iterator.next();
+            if (orderItem.getPhone().getId().equals(phoneId)) {
+                iterator.remove();
+                BigDecimal totalPrice = order.getTotalPrice();
+                totalPrice = totalPrice.subtract(new BigDecimal(orderItem.getQuantity() * orderItem.getPhone().getPrice()));
+                order.setTotalPrice(totalPrice);
+            }
         }
-        if (HttpMethod.POST.name().equals(requestMethod)) {
-            return processRequest(request, response, urlRegexToPostMethodNameMap);
-        }
-        if (HttpMethod.PUT.name().equals(requestMethod)) {
-            return processRequest(request, response, urlRegexToPutMethodNameMap);
-        }
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("error");
-        return modelAndView;
+        return new ResponseEntity<String>(order.getTotalPrice().setScale(2, RoundingMode.HALF_UP).toPlainString(), HttpStatus.OK);
     }
-
 
     public void setPhoneService(PhoneService phoneService) {
         this.phoneService = phoneService;
-    }
-
-    public void setUrlRegexToGetMethodNameMap(Map<String, String> urlRegexToGetMethodNameMap) {
-        this.urlRegexToGetMethodNameMap = urlRegexToGetMethodNameMap;
-    }
-
-    public void setUrlRegexToPostMethodNameMap(Map<String, String> urlRegexToPostMethodNameMap) {
-        this.urlRegexToPostMethodNameMap = urlRegexToPostMethodNameMap;
-    }
-
-    public void setUrlRegexToPutMethodNameMap(Map<String, String> urlRegexToPutMethodNameMap) {
-        this.urlRegexToPutMethodNameMap = urlRegexToPutMethodNameMap;
     }
 }

@@ -9,9 +9,7 @@ import by.expertsoft.phone_shop.entity.Phone;
 import by.expertsoft.phone_shop.persistence.ConnectionPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
@@ -38,7 +36,7 @@ public class OrderDaoImpl implements OrderDao {
                 order.setId(resultSet.getLong("o.id"));
                 order.setName(resultSet.getString("o.name"));
                 order.setSurname(resultSet.getString("o.surname"));
-                order.setPhoneNo(resultSet.getString("o.phone_number"));
+                order.setPhoneNumber(resultSet.getString("o.phone_number"));
                 order.setDate(resultSet.getString("o.date"));
                 order.setStatus(OrderStatus.valueOf(resultSet.getString("o.status")));
                 OrderItem orderItem = new OrderItem();
@@ -98,7 +96,7 @@ public class OrderDaoImpl implements OrderDao {
                     order.setId(resultSet.getLong("o.id"));
                     order.setName(resultSet.getString("o.name"));
                     order.setSurname(resultSet.getString("o.surname"));
-                    order.setPhoneNo(resultSet.getString("o.phone_number"));
+                    order.setPhoneNumber(resultSet.getString("o.phone_number"));
                     order.setDate(resultSet.getString("o.date"));
                     order.setStatus(OrderStatus.valueOf(resultSet.getString("o.status")));
                     OrderItem orderItem = new OrderItem();
@@ -145,7 +143,7 @@ public class OrderDaoImpl implements OrderDao {
             for (OrderItem orderItem : order.getOrderItems()) {
                 statement.setString(1, order.getName());
                 statement.setString(2, order.getSurname());
-                statement.setString(3, order.getPhoneNo());
+                statement.setString(3, order.getPhoneNumber());
                 statement.setString(4, order.getDate());
                 statement.setString(5, order.getStatus().name());
                 statement.setLong(6, orderItem.getPhone().getId());
@@ -183,7 +181,7 @@ public class OrderDaoImpl implements OrderDao {
             for (OrderItem orderItem : order.getOrderItems()) {
                 statement.setString(1, order.getName());
                 statement.setString(2, order.getSurname());
-                statement.setString(3, order.getPhoneNo());
+                statement.setString(3, order.getPhoneNumber());
                 statement.setString(4, order.getDate());
                 statement.setString(5, order.getStatus().name());
                 statement.setLong(6, orderItem.getPhone().getId());

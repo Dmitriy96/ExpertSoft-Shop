@@ -8,7 +8,7 @@ public class Order {
     private Long id;
     private String name;
     private String surname;
-    private String phoneNo;
+    private String phoneNumber;
     private String date;
     private OrderStatus status;
     private List<OrderItem> orderItems;
@@ -38,12 +38,12 @@ public class Order {
         this.surname = surname;
     }
 
-    public String getPhoneNo() {
-        return phoneNo;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setPhoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getDate() {
@@ -87,7 +87,7 @@ public class Order {
 
         if (!name.equals(order.name)) return false;
         if (!surname.equals(order.surname)) return false;
-        if (!phoneNo.equals(order.phoneNo)) return false;
+        if (!phoneNumber.equals(order.phoneNumber)) return false;
         if (!date.equals(order.date)) return false;
         if (status != order.status) return false;
         return totalPrice.equals(order.totalPrice);
@@ -98,7 +98,7 @@ public class Order {
     public int hashCode() {
         int result = name.hashCode();
         result = 31 * result + surname.hashCode();
-        result = 31 * result + phoneNo.hashCode();
+        result = 31 * result + phoneNumber.hashCode();
         result = 31 * result + date.hashCode();
         result = 31 * result + status.hashCode();
         result = 31 * result + totalPrice.hashCode();
@@ -111,7 +111,7 @@ public class Order {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
-                ", phoneNo='" + phoneNo + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", date='" + date + '\'' +
                 ", status=" + status +
                 ", orderItems=" + orderItems +

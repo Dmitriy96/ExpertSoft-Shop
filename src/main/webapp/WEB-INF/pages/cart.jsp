@@ -31,7 +31,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <c:forEach items="${orderItems}" var="orderItem" varStatus="loop">
+                            <c:forEach items="${order.orderItems}" var="orderItem" varStatus="loop">
                                 <tr>
                                     <td>
                                         <div class="cell-text-alignment">${orderItem.phone.name}</div>
@@ -62,12 +62,12 @@
                     <form id="submitCartForm" action="${pageContext.request.contextPath}/cart" method="post"></form>
                 </div>
             </li>
-            <c:if test="${subtotal != 0}">
+            <c:if test="${order.totalPrice != null && order.totalPrice != 0.0}">
                 <li class="list-group-item list-group-item-info">
                     <div class="row">
                         <span class="col-md-5">
                             <h4 id="totalPrice">
-                                Total price: <fmt:formatNumber value="${subtotal}"
+                                Total price: <fmt:formatNumber value="${order.totalPrice}"
                                                                maxFractionDigits="2" type="currency"/>
                             </h4>
                         </span>

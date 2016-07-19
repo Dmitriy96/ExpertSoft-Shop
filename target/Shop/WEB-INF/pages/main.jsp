@@ -31,21 +31,21 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${phones}" var="orderItem" varStatus="loop">
+                <c:forEach items="${phones}" var="phone" varStatus="loop">
                     <tr>
                         <td class="col-md-2">
-                            <div class="cell-text-alignment">${orderItem.name}</div>
+                            <div class="cell-text-alignment">${phone.name}</div>
                         </td>
                         <td class="col-md-2">
-                            <div class="cell-text-alignment">${orderItem.code}</div>
+                            <div class="cell-text-alignment">${phone.code}</div>
                         </td>
                         <td class="col-md-2">
-                            <div class="cell-text-alignment">${orderItem.price}</div>
+                            <div class="cell-text-alignment">${phone.price}</div>
                         </td>
                         <td class="col-md-2">
                             <div class="cell-alignment">
                                 <input type="text" name="quantityInput" min="1" value="1"/>
-                                <button type="button" id="${orderItem.id}" name="addPhoneToCart" data-url="${pageContext.request.contextPath}/cart/add/${orderItem.id}" class="btn btn-info" title="Add">
+                                <button type="button" id="${phone.id}" name="addPhoneToCart" data-url="${pageContext.request.contextPath}/cart/add/${phone.id}" class="btn btn-info" title="Add">
                                     <span class="glyphicon glyphicon-shopping-cart"></span>
                                 </button>
                             </div>
