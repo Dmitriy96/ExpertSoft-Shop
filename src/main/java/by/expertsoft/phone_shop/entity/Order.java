@@ -1,13 +1,22 @@
 package by.expertsoft.phone_shop.entity;
 
+import org.hibernate.validator.constraints.NotBlank;
+
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
 
 
 public class Order {
     private Long id;
+    @NotBlank(message = "Field cannot be empty.")
     private String name;
+    @NotBlank(message = "Field cannot be empty.")
     private String surname;
+    @NotBlank(message = "Field cannot be empty.")
+    @Size(min = 11, message = "Please, input full phone number.")
+    @Pattern(regexp = "\\d+-\\d+-\\d+", message = "Phone number should be in format: X-X-XXXXXXX.")
     private String phoneNumber;
     private String date;
     private OrderStatus status;
@@ -99,9 +108,12 @@ public class Order {
         int result = name.hashCode();
         result = 31 * result + surname.hashCode();
         result = 31 * result + phoneNumber.hashCode();
-        result = 31 * result + date.hashCode();
-        result = 31 * result + status.hashCode();
-        result = 31 * result + totalPrice.hashCode();
+        if (date != null)
+            result = 31 * result + date.hashCode();
+        if (status != null)
+            result = 31 * result + status.hashCode();
+        if (totalPrice != null)
+            result = 31 * result + totalPrice.hashCode();
         return result;
     }
 

@@ -78,7 +78,7 @@
 
     <c:url value="/resources/js/jquery-3.0.0.min.js" var="jquery"/>
     <script type="text/javascript" src="${jquery}"></script>
-    <c:url value="/resources/js/order-overview.js" var="orderOverview"/>
+    <c:url value="/resources/js/order.js" var="orderOverview"/>
     <script type="text/javascript" src="${orderOverview}"></script>
 
 </body>

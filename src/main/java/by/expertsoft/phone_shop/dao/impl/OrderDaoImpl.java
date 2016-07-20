@@ -87,7 +87,10 @@ public class OrderDaoImpl implements OrderDao {
             throw new RuntimeException("Failed to read order", e);
         }
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM `order` o JOIN phone p ON o.phone_id = p.id WHERE o.id = ?")) {
+                "SELECT * FROM `order` o " +
+                "JOIN phone p " +
+                "ON o.phone_id = p.id " +
+                "WHERE o.date = (SELECT o1.date FROM `order` o1 WHERE o1.id = ?)")) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<OrderItem> orderItems = new ArrayList<>();
@@ -128,9 +131,10 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
-    public void save(Order order) {
+    public Long save(Order order) {
         Connection connection = null;
         ConnectionPool connectionPool = ConnectionPool.getInstance();
+        Long id = null;
         try {
             connection = connectionPool.getConnection();
         } catch (InterruptedException e) {
@@ -139,7 +143,7 @@ public class OrderDaoImpl implements OrderDao {
         }
         try (PreparedStatement statement = connection.prepareStatement(
                 "INSERT INTO `order` (`name`, surname, phone_number, `date`, status, phone_id, quantity, total_price) " +
-                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?)")) {
+                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (OrderItem orderItem : order.getOrderItems()) {
                 statement.setString(1, order.getName());
                 statement.setString(2, order.getSurname());
@@ -150,6 +154,10 @@ public class OrderDaoImpl implements OrderDao {
                 statement.setInt(7, orderItem.getQuantity());
                 statement.setBigDecimal(8, order.getTotalPrice());
                 statement.executeUpdate();
+            }
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                id = generatedKeys.getLong(1);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save order", e);
@@ -163,6 +171,7 @@ public class OrderDaoImpl implements OrderDao {
                 }
             }
         }
+        return id;
     }
 
     @Override

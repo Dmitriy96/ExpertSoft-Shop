@@ -19,29 +19,36 @@
         <div class="page-header">
             <h2>Personal data</h2>
         </div>
-        <c:if test="${not empty error}">
-            <div class="alert alert-danger">
-                ${error}
-            </div>
-        </c:if>
         <form action="${pageContext.request.contextPath}/personal_data" method="post">
             <div class="form-group">
                 <label for="nameInput">Name</label>
-                <input type="text" class="form-control" id="nameInput" name="name" placeholder="Name">
+                <input type="text" class="form-control" id="nameInput" name="name" value="${order.name}" placeholder="Name">
+                <c:if test="${not empty nameError}">
+                    <div class="text-danger">${nameError}</div>
+                </c:if>
             </div>
             <div class="form-group">
                 <label for="surnameInput">Surname</label>
-                <input type="text" class="form-control" id="surnameInput" name="surname" placeholder="Surname">
+                <input type="text" class="form-control" id="surnameInput" name="surname" value="${order.surname}" placeholder="Surname">
+                <c:if test="${not empty surnameError}">
+                    <div class="text-danger">${surnameError}</div>
+                </c:if>
             </div>
             <div class="form-group">
                 <label for="phoneNumberInput">Phone number</label>
-                <input type="text" class="form-control" id="phoneNumberInput" name="phoneNumber" placeholder="Phone number">
+                <input type="text" class="form-control" id="phoneNumberInput" name="phoneNumber" value="${order.phoneNumber}" placeholder="Phone number format: X-X-XXXXXXX">
+                <c:if test="${not empty phoneNumberError}">
+                    <div class="text-danger">${phoneNumberError}</div>
+                </c:if>
             </div>
             <div class="checkbox">
                 <label>
                     <input id="deliveryCostInput" name="deliveryCost" type="checkbox"> Accept fixed delivery cost: 5$
                 </label>
             </div>
+            <c:if test="${not empty deliveryCostError}">
+                <div class="text-danger">${deliveryCostError}</div>
+            </c:if>
             <button type="submit" class="btn btn-success btn-lg">Ok</button>
         </form>
     </div>

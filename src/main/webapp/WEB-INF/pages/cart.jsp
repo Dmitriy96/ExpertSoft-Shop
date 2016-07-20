@@ -17,67 +17,79 @@
     <jsp:include page="fragments/header.jsp"/>
 
     <div class="container">
-        <ul class="list-group">
-            <li class="list-group-item">
-                <div class="table-responsive">
-                    <table id="phonesTable" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th><div class="cell-text-alignment">Name</div></th>
-                                <th><div class="cell-text-alignment">Code</div></th>
-                                <th><div class="cell-text-alignment">Price</div></th>
-                                <th><div class="cell-text-alignment">Quantity</div></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${order.orderItems}" var="orderItem" varStatus="loop">
-                                <tr>
-                                    <td>
-                                        <div class="cell-text-alignment">${orderItem.phone.name}</div>
-                                    </td>
-                                    <td>
-                                        <div class="cell-text-alignment">${orderItem.phone.code}</div>
-                                    </td>
-                                    <td>
-                                        <div class="cell-text-alignment">${orderItem.phone.price}</div>
-                                    </td>
-                                    <td>
-                                        <div class="cell-text-alignment">${orderItem.quantity}</div>
-                                    </td>
-                                    <td>
-                                        <div class="cell-alignment">
-                                            <button type="button" id="removeButton-${orderItem.phone.id}" name="removePhoneButton" data-url="${pageContext.request.contextPath}/cart/remove/${orderItem.phone.id}" class="btn btn-danger" title="Remove">
-                                                <span class="glyphicon glyphicon-remove"></span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                    <div id="emptyTableMessage" class="well well-lg text-center hidden">
-                        There are no phones in the cart.
-                    </div>
-                    <form id="submitCartForm" action="${pageContext.request.contextPath}/cart" method="post"></form>
-                </div>
-            </li>
-            <c:if test="${order.totalPrice != null && order.totalPrice != 0.0}">
-                <li class="list-group-item list-group-item-info">
-                    <div class="row">
-                        <span class="col-md-5">
-                            <h4 id="totalPrice">
-                                Total price: <fmt:formatNumber value="${order.totalPrice}"
-                                                               maxFractionDigits="2" type="currency"/>
-                            </h4>
-                        </span>
-                        <span class="col-md-offset-5">
-                            <button type="button" id="submitButton" class="btn btn-info btn-lg">Submit</button>
-                        </span>
+        <form action="${pageContext.request.contextPath}/cart/update" method="post">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="table-responsive">
+                            <table id="phonesTable" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><div class="cell-text-alignment col-md-2">Name</div></th>
+                                        <th><div class="cell-text-alignment col-md-2">Code</div></th>
+                                        <th><div class="cell-text-alignment col-md-2">Price</div></th>
+                                        <th><div class="cell-text-alignment col-md-3">Quantity</div></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach items="${order.orderItems}" var="orderItem" varStatus="loop">
+                                        <tr>
+                                            <td>
+                                                <div class="cell-text-alignment col-md-2">${orderItem.phone.name}</div>
+                                            </td>
+                                            <td>
+                                                <div class="cell-text-alignment col-md-2">${orderItem.phone.code}</div>
+                                            </td>
+                                            <td>
+                                                <div class="cell-text-alignment col-md-2">${orderItem.phone.price}</div>
+                                            </td>
+                                            <td>
+                                                <div class="cell-text-alignment">
+                                                    <input name="phoneId-${orderItem.phone.id}" type="text" value="${orderItem.quantity}">
+                                                    <c:set var="phoneUpdateError" value="phoneIdError-${orderItem.phone.id}"/>
+                                                    <c:if test="${not empty requestScope[phoneUpdateError]}">
+                                                        <div class="text-danger">${requestScope[phoneUpdateError]}</div>
+                                                    </c:if>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="cell-alignment col-md-1">
+                                                    <button type="button" id="removeButton-${orderItem.phone.id}" name="removePhoneButton" data-url="${pageContext.request.contextPath}/cart/remove/${orderItem.phone.id}" class="btn btn-danger" title="Remove">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        ${test}
+                        <div id="emptyTableMessage" class="well well-lg text-center hidden">
+                            There are no phones in the cart.
+                        </div>
                     </div>
                 </li>
-            </c:if>
-        </ul>
+                <c:if test="${order.totalPrice != null && order.totalPrice != 0.0}">
+                    <li class="list-group-item list-group-item-info">
+                        <div class="row">
+                            <span class="col-md-3 col-md-offset-3">
+                                <h4 id="totalPrice">
+                                    Total price: <fmt:formatNumber value="${order.totalPrice}"
+                                                                   maxFractionDigits="2" type="currency"/>
+                                </h4>
+                            </span>
+                            <span class="col-md-2">
+                                <button type="submit" id="updateButton" class="btn btn-warning btn-lg">Update</button>
+                            </span>
+                            <span class="col-md-2 col-md-offset-2">
+                                <button type="button" id="submitButton" class="btn btn-info btn-lg">Submit</button>
+                            </span>
+                        </div>
+                    </li>
+                </c:if>
+            </ul>
+        </form>
+        <form id="submitCartForm" action="${pageContext.request.contextPath}/cart" method="post"></form>
     </div>
 
     <c:url value="/resources/js/jquery-3.0.0.min.js" var="jquery"/>

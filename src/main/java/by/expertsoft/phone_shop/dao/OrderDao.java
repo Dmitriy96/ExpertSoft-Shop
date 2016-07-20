@@ -9,6 +9,6 @@ import java.util.List;
 public interface OrderDao {
     List<Order> findAll();
     Order get(long id);
-    void save(Order order);
+    Long save(Order order);
     void update(Order order);
 }

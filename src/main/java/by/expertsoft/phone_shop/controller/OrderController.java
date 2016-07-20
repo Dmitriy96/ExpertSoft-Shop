@@ -2,69 +2,57 @@ package by.expertsoft.phone_shop.controller;
 
 
 import by.expertsoft.phone_shop.entity.Order;
-import by.expertsoft.phone_shop.entity.OrderStatus;
+import by.expertsoft.phone_shop.entity.OrderDetails;
 import by.expertsoft.phone_shop.service.OrderService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import javax.validation.Valid;
+import java.util.Arrays;
 
 public class OrderController extends ParameterizableViewController {
 
     private Logger logger = LogManager.getLogger(OrderController.class.getName());
     private OrderService orderService;
+    private OrderDetails orderDetails;
 
     public String getPersonalDataPage() {
         logger.debug("getPersonalDataPage");
         return "personalData";
     }
 
-    public String getOrderPage(Model model, HttpSession session) {
+    public String getOrderPage(Model model) {
         logger.debug("getOrderPage");
-        Order order = (Order) session.getAttribute("order");
+        Order order = orderService.getCurrentOrder(orderDetails);
         model.addAttribute("order", order);
         return "order";
     }
 
-    public String addPersonalData(HttpSession session, Order order) {
-        logger.debug("addPersonalData: {}", order);
-        /*String name = request.getParameter("name");
-        String surname = request.getParameter("surname");
-        String phoneNumber = request.getParameter("phoneNumber");
-        String deliveryCost = request.getParameter("totalPrice");               // TODO delivery cost is checkbox value!
-        if (name == null || surname == null || phoneNumber == null || deliveryCost == null) {
-            modelAndView.setViewName("order");
-            modelAndView.addObject("error", "Please, fill all fields.");
-            return modelAndView;
+    public String addPersonalData(Model model, HttpServletRequest request, @Valid Order order, BindingResult bindingResult) {
+        String deliveryCostParameter = request.getParameter("deliveryCost");
+        logger.debug("addPersonalData: {}, {}", order, deliveryCostParameter);
+        if (bindingResult.hasErrors()) {
+            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                model.addAttribute(fieldError.getField() + "Error", fieldError.getDefaultMessage());
+            }
         }
-        if (name.trim().length() < 2 || surname.trim().length() < 2 || phoneNumber.trim().length() < 10) {
-            modelAndView.setViewName("order");
-            modelAndView.addObject("error", "Please, input correct data.");
-            return modelAndView;
+        if (!"on".equals(deliveryCostParameter)) {
+            model.addAttribute("deliveryCostError", "Fixed fixed delivery cost should be accepted!");
+            model.addAttribute("order", order);
+            return "personalData";
         }
-        if (!"on".equals(deliveryCost.trim())) {
-            modelAndView.setViewName("order");
-            modelAndView.addObject("error", "Fixed cost delivery should be accepted.");
-            return modelAndView;
-        }*/
-        Order sessionOrder = (Order) session.getAttribute("order");
-        order.setOrderItems(sessionOrder.getOrderItems());
-        BigDecimal deliveryCost = new BigDecimal(5);
-        BigDecimal totalPrice = sessionOrder.getTotalPrice();
-        order.setTotalPrice(totalPrice.add(deliveryCost));
-        order.setStatus(OrderStatus.NEW);
-        LocalDateTime localDateTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        order.setDate(formatter.format(localDateTime));
-        session.setAttribute("order", order);
+        if (bindingResult.hasErrors())
+            return "personalData";
+        orderService.savePersonalData(orderDetails, order);
         return "redirect:/order";
     }
 
@@ -82,16 +70,28 @@ public class OrderController extends ParameterizableViewController {
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
+    public String getOrderOverviewPage(Model model, HttpServletRequest request) {
+        logger.debug("getOrderOverviewPage");
+        String servletPath = request.getServletPath();
+        Long orderId = Long.parseLong(servletPath.split("/")[2]);
+        Order order = orderService.get(orderId);
+        model.addAttribute("order", order);
+        return "summary";
+    }
 
-    public String saveOrder(HttpSession session) {
+    public String saveOrder() {
         logger.debug("saveOrder");
-        Order order = (Order) session.getAttribute("order");
-        orderService.save(order);
-        session.removeAttribute("order");
-        return "redirect:/orders";
+        Order order = orderService.getCurrentOrder(orderDetails);
+        Long orderId = orderService.save(order);
+        orderService.clearCurrentOrder(orderDetails);
+        return "redirect:/order/" + orderId;
     }
 
     public void setOrderService(OrderService orderService) {
         this.orderService = orderService;
+    }
+
+    public void setOrderDetails(OrderDetails orderDetails) {
+        this.orderDetails = orderDetails;
     }
 }

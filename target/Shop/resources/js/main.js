@@ -6,22 +6,35 @@ $(document).ready(function(){
         var addPhoneButtons = document.getElementsByName("addPhoneToCart");
         for (var i = 0; i < addPhoneButtons.length; i++) {
             addPhoneButtons[i].onclick = function () {
+                var that = this;
                 var quantity = this.previousElementSibling.value;
                 this.previousElementSibling.value = 1;
-                if (!isNaN(parseInt(quantity)) && isFinite(quantity) && quantity > 0) {
-                    var url = this.getAttribute("data-url");
-                    url += "?count=" + quantity;
-                    $.ajax({
-                        url: url,
-                        type: 'PUT',
-                        success: function() {
-                            $("#phoneAddedToCartMessage").show();
-                            setTimeout(function(){
-                                $("#phoneAddedToCartMessage").hide();
-                            }, 2500);
-                        }
-                    });
-                }
+                var url = this.getAttribute("data-url");
+                url += "?count=" + quantity;
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    success: function() {
+                        var phoneId = that.id;
+                        var errorMessage = document.getElementById("phoneIdErrorText-" + phoneId);
+                        errorMessage.innerHTML = "";
+                        errorMessage.classList.add("hidden");
+                        document.getElementById("phoneIdError-" + phoneId).classList.add("hidden");
+                        $("#phoneAddedToCartMessage").show();
+                        setTimeout(function(){
+                            $("#phoneAddedToCartMessage").hide();
+                        }, 2500);
+                    },
+                    error: function (message) {
+                        console.log(message);
+                        console.log(JSON.stringify(message));
+                        var phoneId = that.id;
+                        var errorMessage = document.getElementById("phoneIdErrorText-" + phoneId);
+                        errorMessage.innerHTML = message.responseText;
+                        errorMessage.classList.remove("hidden");
+                        document.getElementById("phoneIdError-" + phoneId).classList.remove("hidden");
+                    }
+                });
             }
         }
     }

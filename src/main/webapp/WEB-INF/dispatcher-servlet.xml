@@ -20,12 +20,14 @@
                 <prop key="/cart">cartController#getCartPage</prop>
                 <prop key="/personal_data">orderController#getPersonalDataPage</prop>
                 <prop key="/order">orderController#getOrderPage</prop>
+                <prop key="/order/\d+">orderController#getOrderOverviewPage</prop>
                 <prop key="/orders">orderController#getOrdersPage</prop>
             </props>
         </property>
         <property name="postMethodMapper">
             <props>
                 <prop key="/cart">cartController#submitCart</prop>
+                <prop key="/cart/update">cartController#updateCart</prop>
                 <prop key="/personal_data">orderController#addPersonalData</prop>
                 <prop key="/order">orderController#saveOrder</prop>
             </props>
@@ -49,12 +51,15 @@
     </bean>
 
     <bean id="cartController" class="by.expertsoft.phone_shop.controller.CartController">
-        <property name="phoneService" ref="phoneService"/>
+        <property name="orderService" ref="orderService"/>
+        <property name="cartService" ref="cartService"/>
+        <property name="orderDetails" ref="orderDetails"/>
         <property name="supportedMethods" value="GET,POST,PUT"/>
     </bean>
 
     <bean id="orderController" class="by.expertsoft.phone_shop.controller.OrderController">
         <property name="orderService" ref="orderService"/>
+        <property name="orderDetails" ref="orderDetails"/>
         <property name="supportedMethods" value="GET,POST,PUT"/>
     </bean>
 

@@ -51,6 +51,12 @@
                             </div>
                         </td>
                     </tr>
+                    <tr id="phoneIdError-${phone.id}" class="hidden">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td id="phoneIdErrorText-${phone.id}" class="text-danger hidden"></td>
+                    </tr>
                 </c:forEach>
                 </tbody>
             </table>
