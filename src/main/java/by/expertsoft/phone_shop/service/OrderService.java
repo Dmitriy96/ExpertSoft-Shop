@@ -12,8 +12,8 @@ public interface OrderService {
     Order get(Long id);
     Long save(Order order);
     void changeStatusToDelivered(Long id);
-    boolean isOrderPresent(OrderDetails orderDetails);
-    Order getCurrentOrder(OrderDetails orderDetails);
-    void savePersonalData(OrderDetails orderDetails, Order order);
-    void clearCurrentOrder(OrderDetails orderDetails);
+    boolean isOrderPresent();
+    Order getCurrentOrder();
+    void savePersonalData(Order order);
+    void clearCurrentOrder();
 }

@@ -22,9 +22,12 @@
           <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.7" />
           <element id="library" level="project" name="Maven: javax.servlet:javax.servlet-api:3.0.1" />
           <element id="library" level="project" name="Maven: javax.validation:validation-api:1.1.0.Final" />
-          <element id="library" level="project" name="Maven: org.hibernate:hibernate-validator:5.0.1.Final" />
-          <element id="library" level="project" name="Maven: org.jboss.logging:jboss-logging:3.1.1.GA" />
-          <element id="library" level="project" name="Maven: com.fasterxml:classmate:0.8.0" />
+          <element id="library" level="project" name="Maven: org.hibernate:hibernate-validator:5.2.1.Final" />
+          <element id="library" level="project" name="Maven: org.jboss.logging:jboss-logging:3.2.1.Final" />
+          <element id="library" level="project" name="Maven: com.fasterxml:classmate:1.1.0" />
+          <element id="library" level="project" name="Maven: org.springframework.security:spring-security-web:4.1.1.RELEASE" />
+          <element id="library" level="project" name="Maven: aopalliance:aopalliance:1.0" />
+          <element id="library" level="project" name="Maven: org.springframework.security:spring-security-core:4.1.1.RELEASE" />
         </element>
       </element>
       <element id="directory" name="META-INF">

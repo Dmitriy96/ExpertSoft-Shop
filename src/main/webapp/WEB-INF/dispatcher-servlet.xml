@@ -34,15 +34,23 @@
         </property>
         <property name="putMethodMapper">
             <props>
-                <prop key="/cart/add/\d+">cartController#addPhoneToCart</prop>
-                <prop key="/cart/remove/\d+">cartController#removePhoneFromCart</prop>
+                <prop key="/cart/add">cartController#addPhoneToCart</prop>
+                <prop key="/cart/remove">cartController#removePhoneFromCart</prop>
                 <prop key="/order/\d+/status">orderController#changeStatusToDelivered</prop>
             </props>
         </property>
     </bean>
 
-    <bean id="orderDetails" class="by.expertsoft.phone_shop.entity.OrderDetails" scope="session">
-        <aop:scoped-proxy/>
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="messages"/>
+    </bean>
+
+    <bean id="phoneQuantityValidator" class="by.expertsoft.phone_shop.support.PhoneQuantityValidator">
+        <property name="messageSource" ref="messageSource"/>
+    </bean>
+
+    <bean id="phoneIdValidator" class="by.expertsoft.phone_shop.support.PhoneIdValidator">
+        <property name="messageSource" ref="messageSource"/>
     </bean>
 
     <bean id="mainController" class="by.expertsoft.phone_shop.controller.MainController">
@@ -53,13 +61,13 @@
     <bean id="cartController" class="by.expertsoft.phone_shop.controller.CartController">
         <property name="orderService" ref="orderService"/>
         <property name="cartService" ref="cartService"/>
-        <property name="orderDetails" ref="orderDetails"/>
+        <property name="phoneQuantityValidator" ref="phoneQuantityValidator"/>
+        <property name="phoneIdValidator" ref="phoneIdValidator"/>
         <property name="supportedMethods" value="GET,POST,PUT"/>
     </bean>
 
     <bean id="orderController" class="by.expertsoft.phone_shop.controller.OrderController">
         <property name="orderService" ref="orderService"/>
-        <property name="orderDetails" ref="orderDetails"/>
         <property name="supportedMethods" value="GET,POST,PUT"/>
     </bean>
 

@@ -15,6 +15,8 @@ $(document).ready(function(){
             emptyTableMessage.classList.remove("hidden");
             var submitButton = document.getElementById("submitButton");
             submitButton.classList.add("disabled");
+            var updateButton = document.getElementById("submitButton");
+            updateButton.classList.add("updateButton");
         }
     }
 
@@ -22,8 +24,11 @@ $(document).ready(function(){
         var removePhoneButtons = document.getElementsByName("removePhoneButton");
         for (var i = 0; i < removePhoneButtons.length; i++) {
             removePhoneButtons[i].onclick = function () {
-                var url = this.getAttribute("data-url");
                 var that = this;
+                var url = that.getAttribute("data-url");
+                var removeButtonId = that.id;
+                var phoneId = removeButtonId.substring(removeButtonId.indexOf("-") + 1);
+                url += "?id=" + phoneId;
                 $.ajax({
                     url: url,
                     type: 'PUT',
@@ -46,10 +51,21 @@ $(document).ready(function(){
         }
     }
 
+    function setUpdatePhonesButtonClickListener() {
+        var submitButton = document.getElementById("updateButton");
+        submitButton.onclick = function () {
+            if (!this.classList.contains("disabled")) {
+                document.getElementById("updateCartForm").submit();
+            }
+        }
+    }
+
     checkIfTableEmpty();
 
     setRemovePhoneButtonsClickListeners();
 
     setSubmitPhonesButtonClickListener();
+
+    setUpdatePhonesButtonClickListener();
     
 });

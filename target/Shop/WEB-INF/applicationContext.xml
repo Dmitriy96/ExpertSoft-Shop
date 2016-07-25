@@ -13,10 +13,19 @@
 
     <bean id="orderService" class="by.expertsoft.phone_shop.service.impl.OrderServiceImpl">
         <property name="orderDao" ref="orderDao"/>
+        <property name="orderDetails" ref="orderDetails"/>
     </bean>
 
     <bean id="cartService" class="by.expertsoft.phone_shop.service.impl.CartServiceImpl">
         <property name="phoneService" ref="phoneService"/>
+        <property name="orderDetails" ref="orderDetails"/>
+    </bean>
+
+    <bean id="orderDetails" class="by.expertsoft.phone_shop.entity.OrderDetails" scope="session">
+        <aop:scoped-proxy/>
+        <property name="order">
+            <bean class="by.expertsoft.phone_shop.entity.Order" />
+        </property>
     </bean>
 
 </beans>

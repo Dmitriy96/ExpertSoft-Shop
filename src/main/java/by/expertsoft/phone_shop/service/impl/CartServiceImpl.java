@@ -12,56 +12,54 @@ import org.apache.logging.log4j.Logger;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class CartServiceImpl implements CartService {
 
     private Logger logger = LogManager.getLogger(CartServiceImpl.class.getName());
     private PhoneService phoneService;
+    private OrderDetails orderDetails;
 
     @Override
-    public void addPhoneToCart(OrderDetails orderDetails, Long phoneId, Integer count) {
-        Order order = orderDetails.getOrder();
-        if (order != null) {
-            OrderItem orderItem = null;
-            for (OrderItem existingOrderItem : order.getOrderItems()) {
-                if (existingOrderItem.getPhone().getId().equals(phoneId)) {
-                    orderItem = existingOrderItem;
-                }
-            }
-            if (orderItem != null) {
-                BigDecimal addingPhonesPrice = new BigDecimal(orderItem.getPhone().getPrice() * count);
-                BigDecimal totalPrice = order.getTotalPrice().add(addingPhonesPrice);
-                order.setTotalPrice(totalPrice);
-                Integer quantity = orderItem.getQuantity();
-                quantity += count;
-                orderItem.setQuantity(quantity);
-            } else {
-                OrderItem newOrderItem = new OrderItem();
-                newOrderItem.setQuantity(count);
-                newOrderItem.setPhone(phoneService.get(phoneId));
-                order.getOrderItems().add(newOrderItem);
-                BigDecimal addingPhonesPrice = new BigDecimal(newOrderItem.getPhone().getPrice() * count);
-                BigDecimal totalPrice = order.getTotalPrice().add(addingPhonesPrice);
-                order.setTotalPrice(totalPrice);
-            }
-        } else {
-            order = new Order();
-            List<OrderItem> orderItems = new ArrayList<>();
-            OrderItem orderItem = new OrderItem();
-            orderItem.setQuantity(count);
-            orderItem.setPhone(phoneService.get(phoneId));
-            orderItems.add(orderItem);
-            order.setOrderItems(orderItems);
-            BigDecimal addingPhonesPrice = new BigDecimal(orderItem.getPhone().getPrice() * count);
-            order.setTotalPrice(addingPhonesPrice);
+    public void addPhoneToCart(Long phoneId, Integer count) {
+        logger.debug("addPhoneToCart: {}, {}", phoneId, count);
+        Order order = this.orderDetails.getOrder();
+        if (order.getOrderItems() == null) {
+            order.setOrderItems(new ArrayList<>());
+            order.setTotalPrice(new BigDecimal(0));
         }
-        orderDetails.setOrder(order);
+        OrderItem orderItem = null;
+        for (OrderItem existingOrderItem : order.getOrderItems()) {
+            if (existingOrderItem.getPhone().getId().equals(phoneId)) {
+                orderItem = existingOrderItem;
+            }
+        }
+        if (orderItem != null) {
+            BigDecimal addingPhonesPrice = new BigDecimal(orderItem.getPhone().getPrice() * count);
+            BigDecimal totalPrice = order.getTotalPrice().add(addingPhonesPrice);
+            order.setTotalPrice(totalPrice);
+            Integer quantity = orderItem.getQuantity();
+            quantity += count;
+            orderItem.setQuantity(quantity);
+        } else {
+            OrderItem newOrderItem = new OrderItem();
+            newOrderItem.setQuantity(count);
+            newOrderItem.setPhone(phoneService.get(phoneId));
+            order.getOrderItems().add(newOrderItem);
+            BigDecimal addingPhonesPrice = new BigDecimal(newOrderItem.getPhone().getPrice() * count);
+            BigDecimal totalPrice = order.getTotalPrice().add(addingPhonesPrice);
+            order.setTotalPrice(totalPrice);
+        }
+        this.orderDetails.setOrder(order);
     }
 
+    /*public Order createEmptyOrder(){
+
+    }*/
+
     @Override
-    public void removePhoneFromCart(OrderDetails orderDetails, Long phoneId) {
-        Order order = orderDetails.getOrder();
+    public void removePhoneFromCart(Long phoneId) {
+        logger.debug("removePhoneFromCart: {}", phoneId);
+        Order order = this.orderDetails.getOrder();
         Iterator<OrderItem> iterator = order.getOrderItems().iterator();
         while (iterator.hasNext()) {
             OrderItem orderItem = iterator.next();
@@ -75,8 +73,9 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void updatePhones(OrderDetails orderDetails, Long phoneId, Integer quantity) {
-        Order order = orderDetails.getOrder();
+    public void updatePhones(Long phoneId, Integer quantity) {
+        logger.debug("updatePhones: {}, {}", phoneId, quantity);
+        Order order = this.orderDetails.getOrder();
         for (OrderItem orderItem : order.getOrderItems()) {
             if (orderItem.getPhone().getId().equals(phoneId)) {
                 BigDecimal totalPrice = order.getTotalPrice();
@@ -89,5 +88,9 @@ public class CartServiceImpl implements CartService {
 
     public void setPhoneService(PhoneService phoneService) {
         this.phoneService = phoneService;
+    }
+
+    public void setOrderDetails(OrderDetails orderDetails) {
+        this.orderDetails = orderDetails;
     }
 }

@@ -23,7 +23,6 @@ public class OrderController extends ParameterizableViewController {
 
     private Logger logger = LogManager.getLogger(OrderController.class.getName());
     private OrderService orderService;
-    private OrderDetails orderDetails;
 
     public String getPersonalDataPage() {
         logger.debug("getPersonalDataPage");
@@ -32,7 +31,7 @@ public class OrderController extends ParameterizableViewController {
 
     public String getOrderPage(Model model) {
         logger.debug("getOrderPage");
-        Order order = orderService.getCurrentOrder(orderDetails);
+        Order order = orderService.getCurrentOrder();
         model.addAttribute("order", order);
         return "order";
     }
@@ -52,7 +51,7 @@ public class OrderController extends ParameterizableViewController {
         }
         if (bindingResult.hasErrors())
             return "personalData";
-        orderService.savePersonalData(orderDetails, order);
+        orderService.savePersonalData(order);
         return "redirect:/order";
     }
 
@@ -81,17 +80,13 @@ public class OrderController extends ParameterizableViewController {
 
     public String saveOrder() {
         logger.debug("saveOrder");
-        Order order = orderService.getCurrentOrder(orderDetails);
+        Order order = orderService.getCurrentOrder();
         Long orderId = orderService.save(order);
-        orderService.clearCurrentOrder(orderDetails);
+        orderService.clearCurrentOrder();
         return "redirect:/order/" + orderId;
     }
 
     public void setOrderService(OrderService orderService) {
         this.orderService = orderService;
-    }
-
-    public void setOrderDetails(OrderDetails orderDetails) {
-        this.orderDetails = orderDetails;
     }
 }

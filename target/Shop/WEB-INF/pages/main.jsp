@@ -44,8 +44,14 @@
                         </td>
                         <td class="col-md-2">
                             <div class="cell-alignment">
-                                <input type="text" name="quantityInput" min="1" value="1"/>
-                                <button type="button" id="${phone.id}" name="addPhoneToCart" data-url="${pageContext.request.contextPath}/cart/add/${phone.id}" class="btn btn-info" title="Add">
+                                <c:set var="phoneAddError" value="phoneIdError-${phone.id}"/>
+                                <c:if test="${not empty requestScope[phoneAddError]}">
+                                    <input name="quantity" type="text" value="${requestScope[phoneAddError]}">
+                                </c:if>
+                                <c:if test="${empty requestScope[phoneAddError]}">
+                                    <input name="quantity" type="text" value="1">
+                                </c:if>
+                                <button type="button" id="${phone.id}" name="addPhoneToCart" data-url="${pageContext.request.contextPath}/cart/add" class="btn btn-info" title="Add">
                                     <span class="glyphicon glyphicon-shopping-cart"></span>
                                 </button>
                             </div>

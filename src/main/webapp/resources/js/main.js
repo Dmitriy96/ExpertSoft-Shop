@@ -8,9 +8,8 @@ $(document).ready(function(){
             addPhoneButtons[i].onclick = function () {
                 var that = this;
                 var quantity = this.previousElementSibling.value;
-                this.previousElementSibling.value = 1;
                 var url = this.getAttribute("data-url");
-                url += "?count=" + quantity;
+                url += "?id=" + that.id + "&quantity=" + quantity;
                 $.ajax({
                     url: url,
                     type: 'PUT',
@@ -19,6 +18,7 @@ $(document).ready(function(){
                         var errorMessage = document.getElementById("phoneIdErrorText-" + phoneId);
                         errorMessage.innerHTML = "";
                         errorMessage.classList.add("hidden");
+                        that.previousElementSibling.value = 1;
                         document.getElementById("phoneIdError-" + phoneId).classList.add("hidden");
                         $("#phoneAddedToCartMessage").show();
                         setTimeout(function(){

@@ -17,7 +17,7 @@
     <jsp:include page="fragments/header.jsp"/>
 
     <div class="container">
-        <form action="${pageContext.request.contextPath}/cart/update" method="post">
+        <form id="updateCartForm" action="${pageContext.request.contextPath}/cart/update" method="post">
             <ul class="list-group">
                 <li class="list-group-item">
                     <div class="table-responsive">
@@ -45,8 +45,14 @@
                                             </td>
                                             <td>
                                                 <div class="cell-text-alignment">
-                                                    <input name="phoneId-${orderItem.phone.id}" type="text" value="${orderItem.quantity}">
                                                     <c:set var="phoneUpdateError" value="phoneIdError-${orderItem.phone.id}"/>
+                                                    <c:set var="phoneIncorrectQuantity" value="phoneQuantity-${orderItem.phone.id}"/>
+                                                    <c:if test="${empty requestScope[phoneUpdateError]}">
+                                                        <input name="${orderItem.phone.id}" type="text" value="${orderItem.quantity}">
+                                                    </c:if>
+                                                    <c:if test="${not empty requestScope[phoneUpdateError]}">
+                                                        <input name="${orderItem.phone.id}" type="text" value="${requestScope[phoneIncorrectQuantity]}">
+                                                    </c:if>
                                                     <c:if test="${not empty requestScope[phoneUpdateError]}">
                                                         <div class="text-danger">${requestScope[phoneUpdateError]}</div>
                                                     </c:if>
@@ -54,7 +60,7 @@
                                             </td>
                                             <td>
                                                 <div class="cell-alignment col-md-1">
-                                                    <button type="button" id="removeButton-${orderItem.phone.id}" name="removePhoneButton" data-url="${pageContext.request.contextPath}/cart/remove/${orderItem.phone.id}" class="btn btn-danger" title="Remove">
+                                                    <button type="button" id="removeButton-${orderItem.phone.id}" name="removePhoneButton" data-url="${pageContext.request.contextPath}/cart/remove" class="btn btn-danger" title="Remove">
                                                         <span class="glyphicon glyphicon-remove"></span>
                                                     </button>
                                                 </div>
@@ -79,7 +85,7 @@
                                 </h4>
                             </span>
                             <span class="col-md-2">
-                                <button type="submit" id="updateButton" class="btn btn-warning btn-lg">Update</button>
+                                <button type="button" id="updateButton" class="btn btn-warning btn-lg">Update</button>
                             </span>
                             <span class="col-md-2 col-md-offset-2">
                                 <button type="button" id="submitButton" class="btn btn-info btn-lg">Submit</button>

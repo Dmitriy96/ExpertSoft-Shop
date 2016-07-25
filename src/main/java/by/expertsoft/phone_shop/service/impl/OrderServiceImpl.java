@@ -22,6 +22,7 @@ import java.util.Map;
 public class OrderServiceImpl implements OrderService {
 
     private OrderDao orderDao;
+    private OrderDetails orderDetails;
 
     @Override
     public List<Order> findAll() {
@@ -46,8 +47,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean isOrderPresent(OrderDetails orderDetails) {
-        Order order = orderDetails.getOrder();
+    public boolean isOrderPresent() {
+        Order order = this.orderDetails.getOrder();
         if (order == null || order.getOrderItems() == null || order.getOrderItems().size() == 0) {
             return false;
         }
@@ -55,13 +56,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order getCurrentOrder(OrderDetails orderDetails) {
+    public Order getCurrentOrder() {
         return orderDetails.getOrder();
     }
 
     @Override
-    public void savePersonalData(OrderDetails orderDetails, Order order) {
-        Order sessionOrder = orderDetails.getOrder();
+    public void savePersonalData(Order order) {
+        Order sessionOrder = this.orderDetails.getOrder();
         order.setOrderItems(sessionOrder.getOrderItems());
         BigDecimal deliveryCost = new BigDecimal(5);
         BigDecimal totalPrice = sessionOrder.getTotalPrice();
@@ -70,15 +71,19 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         order.setDate(formatter.format(localDateTime));
-        orderDetails.setOrder(order);
+        this.orderDetails.setOrder(order);
     }
 
     @Override
-    public void clearCurrentOrder(OrderDetails orderDetails) {
-        orderDetails.setOrder(null);
+    public void clearCurrentOrder() {
+        this.orderDetails.setOrder(null);
     }
 
     public void setOrderDao(OrderDao orderDao) {
         this.orderDao = orderDao;
+    }
+
+    public void setOrderDetails(OrderDetails orderDetails) {
+        this.orderDetails = orderDetails;
     }
 }
