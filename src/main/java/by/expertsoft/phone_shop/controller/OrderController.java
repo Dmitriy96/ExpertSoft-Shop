@@ -1,8 +1,8 @@
 package by.expertsoft.phone_shop.controller;
 
 
+import by.expertsoft.phone_shop.entity.DeliveryCostWrapper;
 import by.expertsoft.phone_shop.entity.Order;
-import by.expertsoft.phone_shop.entity.OrderDetails;
 import by.expertsoft.phone_shop.service.OrderService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,13 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.Arrays;
 
 public class OrderController extends ParameterizableViewController {
 
@@ -36,20 +33,20 @@ public class OrderController extends ParameterizableViewController {
         return "order";
     }
 
-    public String addPersonalData(Model model, HttpServletRequest request, @Valid Order order, BindingResult bindingResult) {
-        String deliveryCostParameter = request.getParameter("deliveryCost");
-        logger.debug("addPersonalData: {}, {}", order, deliveryCostParameter);
-        if (bindingResult.hasErrors()) {
-            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+    public String addPersonalData(Model model, @Valid Order order, BindingResult orderBindingResult,
+                                  @Valid DeliveryCostWrapper deliveryCostWrapper, BindingResult deliveryCostBindingResult) {
+        logger.debug("addPersonalData: {}, {}", order, deliveryCostWrapper);
+        if (orderBindingResult.hasErrors()) {
+            for (FieldError fieldError : orderBindingResult.getFieldErrors()) {
                 model.addAttribute(fieldError.getField() + "Error", fieldError.getDefaultMessage());
             }
         }
-        if (!"on".equals(deliveryCostParameter)) {
-            model.addAttribute("deliveryCostError", "Fixed fixed delivery cost should be accepted!");
-            model.addAttribute("order", order);
+        if (deliveryCostBindingResult.hasErrors()) {
+            FieldError fieldError = deliveryCostBindingResult.getFieldError();
+            model.addAttribute(fieldError.getField() + "Error", fieldError.getDefaultMessage());
             return "personalData";
         }
-        if (bindingResult.hasErrors())
+        if (orderBindingResult.hasErrors())
             return "personalData";
         orderService.savePersonalData(order);
         return "redirect:/order";

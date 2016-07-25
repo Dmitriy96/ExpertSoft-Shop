@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -17,7 +18,10 @@
     <jsp:include page="fragments/header.jsp"/>
 
     <div class="container">
-        <form id="updateCartForm" action="${pageContext.request.contextPath}/cart/update" method="post">
+        <form:form id="updateCartForm" action="${pageContext.request.contextPath}/cart/update" modelAttribute="phoneQuantityList" method="post">
+            <c:set var="formHasErrors">
+                <form:errors path="*" cssClass="hidden"/>
+            </c:set>
             <ul class="list-group">
                 <li class="list-group-item">
                     <div class="table-responsive">
@@ -45,17 +49,19 @@
                                             </td>
                                             <td>
                                                 <div class="cell-text-alignment">
-                                                    <c:set var="phoneUpdateError" value="phoneIdError-${orderItem.phone.id}"/>
-                                                    <c:set var="phoneIncorrectQuantity" value="phoneQuantity-${orderItem.phone.id}"/>
-                                                    <c:if test="${empty requestScope[phoneUpdateError]}">
-                                                        <input name="${orderItem.phone.id}" type="text" value="${orderItem.quantity}">
-                                                    </c:if>
-                                                    <c:if test="${not empty requestScope[phoneUpdateError]}">
-                                                        <input name="${orderItem.phone.id}" type="text" value="${requestScope[phoneIncorrectQuantity]}">
-                                                    </c:if>
-                                                    <c:if test="${not empty requestScope[phoneUpdateError]}">
-                                                        <div class="text-danger">${requestScope[phoneUpdateError]}</div>
-                                                    </c:if>
+                                                    <c:set var="phoneIncorrectQuantity" value="phoneQuantity-${loop.index}"/>
+                                                    <form:input path="phonesQuantityList[${loop.index}].id" cssClass="hidden" type="text" value="${orderItem.phone.id}"/>
+                                                    <div class="row">
+                                                        <c:if test="${empty requestScope[phoneIncorrectQuantity]}">
+                                                            <form:input name="${orderItem.phone.id}" type="text" value="${orderItem.quantity}" path="phonesQuantityList[${loop.index}].quantity"/>
+                                                        </c:if>
+                                                        <c:if test="${not empty requestScope[phoneIncorrectQuantity]}">
+                                                            <form:input name="${orderItem.phone.id}" type="text" value="${requestScope[phoneIncorrectQuantity]}" path="phonesQuantityList[${loop.index}].quantity"/>
+                                                        </c:if>
+                                                    </div>
+                                                    <div class="row">
+                                                        <form:errors path="phonesQuantityList[${loop.index}].quantity" cssClass="text-danger"/>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td>
@@ -69,7 +75,6 @@
                                     </c:forEach>
                                 </tbody>
                             </table>
-                        ${test}
                         <div id="emptyTableMessage" class="well well-lg text-center hidden">
                             There are no phones in the cart.
                         </div>
@@ -88,13 +93,18 @@
                                 <button type="button" id="updateButton" class="btn btn-warning btn-lg">Update</button>
                             </span>
                             <span class="col-md-2 col-md-offset-2">
-                                <button type="button" id="submitButton" class="btn btn-info btn-lg">Submit</button>
+                                <c:if test="${empty formHasErrors}">
+                                    <button type="button" id="submitButton" class="btn btn-info btn-lg">Submit</button>
+                                </c:if>
+                                <c:if test="${not empty formHasErrors}">
+                                    <button type="button" id="submitButton" class="btn btn-info btn-lg disabled">Submit</button>
+                                </c:if>
                             </span>
                         </div>
                     </li>
                 </c:if>
             </ul>
-        </form>
+        </form:form>
         <form id="submitCartForm" action="${pageContext.request.contextPath}/cart" method="post"></form>
     </div>
 

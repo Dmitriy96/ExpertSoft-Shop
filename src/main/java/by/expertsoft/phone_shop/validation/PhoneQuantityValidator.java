@@ -1,4 +1,4 @@
-package by.expertsoft.phone_shop.support;
+package by.expertsoft.phone_shop.validation;
 
 import by.expertsoft.phone_shop.entity.PhoneQuantityWrapper;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +21,7 @@ public class PhoneQuantityValidator implements Validator {
     @Override
     public void validate(Object o, Errors errors) {
         PhoneQuantityWrapper phoneQuantityWrapper = (PhoneQuantityWrapper) o;
+        logger.debug("validate: {}", phoneQuantityWrapper);
         if (phoneQuantityWrapper.getId() == null) {
             errors.rejectValue("id", "requireNumbers", null, messageSource.getMessage("required", null, null));
         } else

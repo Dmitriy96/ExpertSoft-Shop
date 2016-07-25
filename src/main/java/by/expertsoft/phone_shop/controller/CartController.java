@@ -17,11 +17,15 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class CartController extends ParameterizableViewController {
 
@@ -30,7 +34,6 @@ public class CartController extends ParameterizableViewController {
     private CartService cartService;
     private Validator phoneQuantityValidator;
     private Validator phoneIdValidator;
-    private Validator phoneQuantityListValidator;
 
     @InitBinder("phoneQuantityWrapper")
     private void phoneQuantityBinder(WebDataBinder binder) {
@@ -44,16 +47,12 @@ public class CartController extends ParameterizableViewController {
         binder.setValidator(phoneIdValidator);
     }
 
-    @InitBinder("phoneQuantityListWrapper")
-    private void phoneQuantityListBinder(WebDataBinder binder) {
-        logger.debug("phoneQuantityListBinder: {}", binder.getTarget(), binder.getObjectName());
-        binder.setValidator(phoneQuantityListValidator);
-    }
 
     public String getCartPage(Model model) {
         logger.debug("getCartPage");
         Order order = orderService.getCurrentOrder();
         model.addAttribute("order", order);
+        model.addAttribute("phoneQuantityList", new PhoneQuantityListWrapper());
         return "cart";
     }
 
@@ -89,21 +88,30 @@ public class CartController extends ParameterizableViewController {
         return new ResponseEntity<String>(order.getTotalPrice().setScale(2, RoundingMode.HALF_UP).toPlainString(), HttpStatus.OK);
     }
 
-    public String updateCart(Model model, @Valid PhoneQuantityListWrapper phoneQuantityList, BindingResult bindingResult) {
+    public String updateCart(Model model, @ModelAttribute("phoneQuantityList") @Valid PhoneQuantityListWrapper phoneQuantityList, BindingResult bindingResult) {
         logger.debug("updateCart: {}", phoneQuantityList);
+        Set<Integer> incorrectFieldsIndexSet = new HashSet<>();
         if (bindingResult.hasErrors()) {
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
                 String fieldName = fieldError.getField();
-                model.addAttribute("phoneIdError-" + fieldName.substring(fieldName.indexOf("-") + 1),
-                        fieldError.getDefaultMessage());
+                fieldName = fieldName.substring(fieldName.indexOf("[") + 1);
+                fieldName = fieldName.substring(0, fieldName.indexOf("]"));
+                incorrectFieldsIndexSet.add(Integer.parseInt(fieldName));
+                model.addAttribute("phoneQuantity-" + fieldName,
+                        fieldError.getRejectedValue() == null ? " " : fieldError.getRejectedValue());
             }
         }
         if (phoneQuantityList.getPhonesQuantityList() != null) {
-            for (PhoneQuantityWrapper phonesQuantity : phoneQuantityList.getPhonesQuantityList()) {
-                cartService.updatePhones(phonesQuantity.getId(), phonesQuantity.getQuantity());
-                model.addAttribute("phoneQuantity-" + phonesQuantity.getId(), phonesQuantity.getQuantity());
+            List<PhoneQuantityWrapper> phoneQuantityWrapperList = phoneQuantityList.getPhonesQuantityList();
+            for (int i = 0; i < phoneQuantityWrapperList.size(); i++) {
+                if (!incorrectFieldsIndexSet.contains(i)) {
+                    PhoneQuantityWrapper phonesQuantity = phoneQuantityWrapperList.get(i);
+                    cartService.updatePhones(phonesQuantity.getId(), phonesQuantity.getQuantity());
+                }
             }
         }
+        if (!bindingResult.hasErrors())
+            model.addAttribute("phoneQuantityList", new PhoneQuantityListWrapper());
         model.addAttribute("order", orderService.getCurrentOrder());
         return "/cart";
     }
@@ -122,9 +130,5 @@ public class CartController extends ParameterizableViewController {
 
     public void setPhoneIdValidator(Validator phoneIdValidator) {
         this.phoneIdValidator = phoneIdValidator;
-    }
-
-    public void setPhoneQuantityListValidator(Validator phoneQuantityListValidator) {
-        this.phoneQuantityListValidator = phoneQuantityListValidator;
     }
 }

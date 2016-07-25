@@ -45,11 +45,11 @@
         <property name="basename" value="messages"/>
     </bean>
 
-    <bean id="phoneQuantityValidator" class="by.expertsoft.phone_shop.support.PhoneQuantityValidator">
+    <bean id="phoneQuantityValidator" class="by.expertsoft.phone_shop.validation.PhoneQuantityValidator">
         <property name="messageSource" ref="messageSource"/>
     </bean>
 
-    <bean id="phoneIdValidator" class="by.expertsoft.phone_shop.support.PhoneIdValidator">
+    <bean id="phoneIdValidator" class="by.expertsoft.phone_shop.validation.PhoneIdValidator">
         <property name="messageSource" ref="messageSource"/>
     </bean>
 

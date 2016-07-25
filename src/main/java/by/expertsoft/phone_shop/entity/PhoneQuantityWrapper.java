@@ -1,8 +1,15 @@
 package by.expertsoft.phone_shop.entity;
 
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 public class PhoneQuantityWrapper {
+    @NotNull
+    @Min(value = 1)
     private Long id;
+    @NotNull(message = "This field can't be empty.")
+    @Min(value = 1, message = "This field should contain number more then zero.")
     private Integer quantity;
 
     public Long getId() {
